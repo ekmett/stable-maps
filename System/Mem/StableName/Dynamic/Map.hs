@@ -1,11 +1,19 @@
 module System.Mem.StableName.Dynamic.Map
-    ( DynamicStableMap 
-    , insertDynamicStableMap
-    , lookupDynamicStableMap
+    ( Map
+    , empty
+    , null
+    , singleton
+    , member
+    , notMember
+    , insert
+    , insertWith
+
     ) where
 
+import qualified Prelude
+import Prelude hiding (lookup, null)
 import System.Mem.StableName.Dynamic
-import Data.IntMap as IntMap
+import qualified Data.IntMap as IntMap
 import Data.IntMap (IntMap)
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -15,7 +23,7 @@ empty :: Map a
 empty = Map IntMap.empty
 
 null :: Map a -> Bool
-null (Map m) = null m
+null (Map m) = IntMap.null m
 
 singleton :: DynamicStableName -> a -> Map a
 singleton k v = Map $ IntMap.singleton (hashDynamicStableName k) [(k,v)]
@@ -39,19 +47,19 @@ insert k v = Map . IntMap.insertWith (++) (hashDynamicStableName k) [(k,v)] . ge
 insertWith :: (a -> a -> a) -> DynamicStableName -> a -> Map a -> Map a
 insertWith f k v = Map . IntMap.insertWith go (hashDynamicStableName k) [(k,v)] . getMap 
     where 
-        go ((k',v'):kvs) 
+        go _ ((k',v'):kvs) 
             | k == k' = (k', f v v') : kvs
-            | otherwise = (k',v') : go kvs
-        go [] = []
+            | otherwise = (k',v') : go undefined kvs
+        go _ [] = []
 
 -- | Same as 'insertWith', but with the combining function applied strictly.
 insertWith' :: (a -> a -> a) -> DynamicStableName -> a -> Map a -> Map a
-insertWith' f k v = Map . IntMap.insertWith go (hash k) [(k,v)] . getMap 
+insertWith' f k v = Map . IntMap.insertWith go (hashDynamicStableName k) [(k,v)] . getMap 
     where 
-        go ((k',v'):dvs) 
+        go _ ((k',v'):kvs) 
             | k == k' = let v'' = f v v' in v'' `seq` (k', v'') : kvs
-            | otherwise = (k,v') : insert' kvs
-        go [] = []
+            | otherwise = (k', v') : go undefined kvs
+        go _ [] = []
 
 -- | /O(log n)/. Lookup the value at a key in the map.
 -- 
@@ -63,7 +71,7 @@ lookup k (Map m) = do
     Prelude.lookup k pairs
 
 find :: DynamicStableName -> Map v -> v
-find = case lookup k m of
+find k m = case lookup k m of
     Nothing -> error "Map.find: element not in the map"
     Just x -> x 
 
@@ -71,4 +79,4 @@ find = case lookup k m of
 -- the value at key @k@ or returns the default value @def@
 -- when the key is not in the map.
 findWithDefault :: v -> DynamicStableName -> Map v -> v
-findWithDefault dflt m = maybe dflt id $ lookup k m 
+findWithDefault dflt k m = maybe dflt id $ lookup k m 

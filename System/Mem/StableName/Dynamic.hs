@@ -17,6 +17,7 @@ module System.Mem.StableName.Dynamic
     ( DynamicStableName(..)
     , hashDynamicStableName
     , makeDynamicStableName
+    , wrapStableName
     ) where
 
 import GHC.Prim
