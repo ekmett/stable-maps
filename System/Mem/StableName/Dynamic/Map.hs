@@ -7,6 +7,7 @@ module System.Mem.StableName.Dynamic.Map
     , notMember
     , insert
     , insertWith
+    , insertWith'
     , lookup
     , find
     , findWithDefault
@@ -17,7 +18,6 @@ import Prelude hiding (lookup, null)
 import System.Mem.StableName.Dynamic
 import qualified Data.IntMap as IntMap
 import Data.IntMap (IntMap)
-import Unsafe.Coerce (unsafeCoerce)
 
 newtype Map a = Map { getMap :: IntMap [(DynamicStableName, a)] } 
 

@@ -11,6 +11,10 @@ Category:          Math
 Build-type:        Simple
 Cabal-version:     >=1.6
 
+source-repository head
+  type: git
+  location: git://github.com/ekmett/stable-maps.git
+
 Library
   Exposed-modules: System.Mem.StableName.Map
                    System.Mem.StableName.Dynamic
