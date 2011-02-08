@@ -7,7 +7,9 @@ module System.Mem.StableName.Dynamic.Map
     , notMember
     , insert
     , insertWith
-
+    , lookup
+    , find
+    , findWithDefault
     ) where
 
 import qualified Prelude

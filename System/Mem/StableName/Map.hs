@@ -1,5 +1,6 @@
 module System.Mem.StableName.Map 
-    ( empty
+    ( Map
+    , empty
     , null
     , singleton
     , member
