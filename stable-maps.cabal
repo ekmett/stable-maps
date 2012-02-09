@@ -1,5 +1,5 @@
 Name:              stable-maps
-Version:           0.0.2
+Version:           0.0.3
 Synopsis:          Heterogeneous maps keyed by StableNames
 Description:       Provides an API for inserting heterogeneous data in a collection keyed by StableNames and for later retrieving it.
 Homepage:          http://github.com/ekmett/stable-maps
@@ -20,6 +20,6 @@ Library
                    System.Mem.StableName.Dynamic
                    System.Mem.StableName.Dynamic.Map
   Build-depends:   base >= 4 && < 5,
-                   containers >= 0.3 && < 0.4,
+                   containers >= 0.3 && < 0.5,
                    ghc-prim >= 0.2 && < 0.3
   GHC-Options:     -Wall
