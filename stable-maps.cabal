@@ -1,8 +1,9 @@
 Name:              stable-maps
-Version:           0.0.3.1
+Version:           0.0.3.2
 Synopsis:          Heterogeneous maps keyed by StableNames
 Description:       Provides an API for inserting heterogeneous data in a collection keyed by StableNames and for later retrieving it.
 Homepage:          http://github.com/ekmett/stable-maps
+Bug-Reports:       http://github.com/ekmett/stable-maps/issues
 License:           BSD3
 License-file:      LICENSE
 Author:            Edward Kmett
@@ -10,6 +11,7 @@ Maintainer:        ekmett@gmail.com
 Category:          Math
 Build-type:        Simple
 Cabal-version:     >=1.6
+Extra-Source-Files: .travis.yml
 
 source-repository head
   type: git
