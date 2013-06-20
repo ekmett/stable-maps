@@ -1,3 +1,7 @@
+{-# LANGUAGE CPP #-}
+#if defined(__GLASGOW_HASKELL__) && __GLASGOW_HASKELL__ >= 702
+{-# LANGUAGE Unsafe #-}
+#endif
 module System.Mem.StableName.Dynamic.Map
     ( Map
     , empty
