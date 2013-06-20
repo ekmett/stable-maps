@@ -1,7 +1,7 @@
 Name:              stable-maps
-Version:           0.0.3.3
+Version:           0.0.4
 Synopsis:          Heterogeneous maps keyed by StableNames
-Description:       Provides an API for inserting heterogeneous data in a collection keyed by StableNames and for later retrieving it.
+Description:       Provides an unsafe API for inserting heterogeneous data in a collection keyed by StableNames and for later retrieving it.
 Homepage:          http://github.com/ekmett/stable-maps
 Bug-Reports:       http://github.com/ekmett/stable-maps/issues
 License:           BSD3
