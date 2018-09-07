@@ -1,6 +1,6 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE TypeFamilies, Rank2Types #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 #if __GLASGOW_HASKELL__ >= 702
 {-# LANGUAGE Trustworthy #-}
 #endif
@@ -18,11 +18,11 @@
 -- Dynamic stable names solve the following problem: suppose you want to build a hash table with Haskell objects as keys, but you want to use pointer equality for comparison; maybe because the keys are large and hashing would be slow, or perhaps because the keys are infinite in size. We can't build a hash table using the address of the object as the key, because objects get moved around by the garbage collector, meaning a re-hash would be necessary after every garbage collection.
 -----------------------------------------------------------------------------
 
-module System.Mem.StableName.Dynamic 
-    ( DynamicStableName(..)
-    , hashDynamicStableName
-    , makeDynamicStableName
-    , wrapStableName
+module System.Mem.StableName.TaggedSN
+    ( TaggedSN(..)
+    , hashTaggedSN
+    , makeTaggedSN
+    , wrapTaggedSN
     ) where
 
 import GHC.Exts (Any)
@@ -30,6 +30,9 @@ import GHC.Exts (Any)
 import System.Mem.StableName (StableName, makeStableName, hashStableName)
 import Unsafe.Coerce (unsafeCoerce)
 import Data.Hashable
+import GHC.Fingerprint (Fingerprint)
+import Data.Typeable (Typeable, typeRep, typeRepFingerprint)
+import Data.Proxy (Proxy (..))
 
 {-|
   An abstract name for an object, that supports equality and hashing.
@@ -60,29 +63,36 @@ import Data.Hashable
 
 -}
 
-newtype DynamicStableName = DynamicStableName (StableName Any)
-  deriving (Eq, Hashable)
+data TaggedSN = TaggedSN {-# UNPACK #-} !Fingerprint !(StableName Any)
+  deriving Eq
 
-instance Show DynamicStableName where
-  showsPrec d (DynamicStableName sn) =
-    showParen (d > 10) $
-      showString "DynamicStableName <<hash = " .
-      showsPrec 0 (hashStableName sn) .
-      showString ">>"
+instance Hashable TaggedSN where
+  -- This could produce collisions when the same value
+  -- has multiple types, but I don't know that it's worth
+  -- the performance cost in the common case to avoid that.
+  hashWithSalt s (TaggedSN _fp sn) = hashWithSalt s sn
+
+instance Show TaggedSN where
+  showsPrec d (TaggedSN fp sn) = showParen (d > 10) $
+    showString "TaggedSN {fp = " .
+    showsPrec 11 fp .
+    showString ", hash = " .
+    showsPrec 11 (hashStableName sn) .
+    showString "}"
 
 -- | Makes a 'DynamicStableName' for an arbitrary object.  The object passed as
 -- the first argument is not evaluated by 'makeDynamicStableName'.
-makeDynamicStableName :: t -> IO DynamicStableName
-makeDynamicStableName a = do
+makeTaggedSN :: Typeable t => t -> IO TaggedSN
+makeTaggedSN a = do
     s <- makeStableName a
-    return (wrapStableName s)
+    return (wrapTaggedSN s)
 
--- | Convert a 'DynamicStableName' to an 'Int'.  The 'Int' returned is not
--- necessarily unique; several 'DynamicStableName's may map to the same 'Int'
+-- | Convert a 'TaggedSN' to an 'Int'.  The 'Int' returned is not
+-- necessarily unique; several 'TaggedSN's may map to the same 'Int'
 -- (in practice however, the chances of this are small, so the result
--- of 'hashDynamicStableName' makes a good hash key).
-hashDynamicStableName :: DynamicStableName -> Int
-hashDynamicStableName (DynamicStableName sn) = hashStableName sn
+-- of 'hashTaggedSN' makes a good hash key).
+hashTaggedSN :: TaggedSN -> Int
+hashTaggedSN (TaggedSN _ sn) = hashStableName sn
 
-wrapStableName :: StableName a -> DynamicStableName
-wrapStableName s = DynamicStableName (unsafeCoerce s)
+wrapTaggedSN :: forall a. Typeable a => StableName a -> TaggedSN
+wrapTaggedSN s = TaggedSN (typeRepFingerprint (typeRep (Proxy :: Proxy a))) (unsafeCoerce s)
