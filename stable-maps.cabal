@@ -19,9 +19,15 @@ source-repository head
 
 Library
   Exposed-modules: System.Mem.StableName.Map
+                   System.Mem.StableName.Map.Unsafe
                    System.Mem.StableName.Dynamic
+                   System.Mem.StableName.TypedMap
                    System.Mem.StableName.Dynamic.Map
+                   System.Mem.StableName.TaggedSN
+  Other-modules:   System.Mem.StableName.Map.Internal
   Build-depends:   base       >= 4   && < 5,
-                   containers >= 0.3 && < 0.6,
-                   ghc-prim   >= 0.2 && < 0.4
+                   containers >= 0.3 && < 0.8,
+                   -- ghc-prim   >= 0.2 && < 0.6,
+                   hashable   >= 1.1.2,
+                   unordered-containers
   GHC-Options:     -Wall
