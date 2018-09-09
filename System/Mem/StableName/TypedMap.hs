@@ -8,6 +8,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE RankNTypes #-}
 
 -- | @"System.Mem.StableName.Map".'System.Mem.StableName.Map.Map' f@
 -- is only permitted (without unsafe functions) when @f@'s parameter
@@ -26,6 +27,11 @@ module System.Mem.StableName.TypedMap
     , insertWith'
     , adjust
     , adjust'
+    , hmap
+    , hmap'
+    , hfoldMap
+    , htraverse
+    , htraverse'
     , lookup
     , find
     , findWithDefault
@@ -41,6 +47,8 @@ import Data.HashMap.Lazy (HashMap)
 import Unsafe.Coerce (unsafeCoerce)
 import Data.Typeable (Typeable)
 import Data.Hashable (Hashable)
+import qualified Data.Foldable as F
+import qualified Data.Traversable as T
 
 newtype Map f = Map { getMap :: HashMap TaggedSN (f Any) }
 #if __GLASGOW_HASKELL__ >= 707
@@ -107,6 +115,34 @@ adjust f k = Map . M.adjust (liftAny1 f) (wrapTaggedSN k) . getMap
 
 adjust' :: Typeable a => (f a -> f a) -> StableName a -> Map f -> Map f
 adjust' f k = Map . MS.adjust (liftAny1 f) (wrapTaggedSN k) . getMap
+
+hmap
+  :: (forall a. f a -> g a)
+  -> Map f -> Map g
+hmap f (Map m) = Map (fmap f m)
+
+hmap'
+  :: (forall a. f a -> g a)
+  -> Map f -> Map g
+hmap' f (Map m) = Map (MS.map f m)
+
+hfoldMap
+  :: Monoid m
+  => (forall a. f a -> m)
+  -> Map f -> m
+hfoldMap f (Map m) = F.foldMap f m
+
+htraverse
+  :: Applicative m
+  => (forall a. f a -> m (g a))
+  -> Map f -> m (Map g)
+htraverse f (Map m) = Map <$> T.traverse f m
+
+htraverse'
+  :: Applicative m
+  => (forall a. f a -> m (g a))
+  -> Map f -> m (Map g)
+htraverse' f (Map m) = Map <$> MS.traverseWithKey (\_ v -> f v) m
 
 -- | /O(log n)/. Lookup the value at a key in the map.
 --

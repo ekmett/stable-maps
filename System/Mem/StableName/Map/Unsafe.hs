@@ -7,8 +7,13 @@
 -- "System.Mem.StableName.TypedMap" will do the trick, but it's
 -- somewhat less efficient.
 module System.Mem.StableName.Map.Unsafe
-    ( unsafeEmpty
-    , unsafeSingleton
+    ( unsafeInsertWith
+    , unsafeInsertWith'
+    , unsafeAdjust
+    , unsafeAdjust'
+    , unsafeLookup
+    , unsafeFind
+    , unsafeFindWithDefault
     ) where
 
 import System.Mem.StableName.Map.Internal

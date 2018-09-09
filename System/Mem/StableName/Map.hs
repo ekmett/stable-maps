@@ -17,6 +17,11 @@ module System.Mem.StableName.Map
     , insertWith'
     , adjust
     , adjust'
+    , hmap
+    , hfoldMap
+    , htraverse
+    , hmap'
+    , htraverse'
     , lookup
     , find
     , findWithDefault
